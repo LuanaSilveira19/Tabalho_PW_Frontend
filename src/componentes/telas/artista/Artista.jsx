@@ -7,10 +7,11 @@ import {
 import Tabela from "./Tabela";
 import Formulario from './Formulario';
 import Carregando from '../../comuns/Carregando';
-
+import WithAuth from '../../../seguranca/WithAuth';
+import { useNavigate } from 'react-router-dom';
 
 function Artista() {
-
+    let navigate= useNavigate();
     const [alerta, setAlerta] = useState({ status: "", message: "" });
     const [listaObjetos, setListaObjetos] = useState([]);
     const [editar, setEditar] = useState(false);
@@ -31,10 +32,14 @@ function Artista() {
     }
 
     const editarObjeto = async codigo => {
+        try{
         setObjeto(await getArtistaPorCodigo(codigo))
         setEditar(true);
         setAlerta({ status: "", message: "" });
 		setExibirForm(true);
+    }catch  (err){
+        navigate("/login", { replace: true });
+    }
     }
 
     const acaoCadastrar = async e => {
@@ -49,6 +54,7 @@ function Artista() {
             }
         } catch (err) {
             console.error(err.message);
+            navigate("/login", { replace: true });
         }
         recuperaArtistas();
     }
@@ -60,17 +66,24 @@ function Artista() {
 
 
     const recuperaArtistas = async () => {
-    
+    try{
         setCarregando(true);
         setListaObjetos(await getArtistasAPI());
         setCarregando(false);
+    }catch  (err){
+        navigate("/login", { replace: true });
+    }
     }
 
     const remover = async codigo => {
         if (window.confirm('Deseja remover este artista?')) {
+            try{
             let retornoAPI = await deleteArtistas(codigo);
             setAlerta({ status: retornoAPI.status, message: retornoAPI.message })
             recuperaArtistas();
+        }catch  (err){
+            navigate("/login", { replace: true });
+        }
         }
     }
 
@@ -94,4 +107,4 @@ function Artista() {
     );
 }
 
-export default Artista;
+export default WithAuth (Artista);

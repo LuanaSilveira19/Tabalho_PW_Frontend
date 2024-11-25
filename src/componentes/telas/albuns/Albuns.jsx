@@ -8,9 +8,11 @@ import {
 import Tabela2 from "./Tabela2";
 import Formulario2 from './Formulario2';
 import Carregando from '../../comuns/Carregando';
-
-
+import WithAuth from '../../../seguranca/WithAuth';
+import { useNavigate } from 'react-router-dom';
 function Albuns() {
+
+    let navigate= useNavigate();
 
     const [listaArtistas, setListaArtistas] = useState([]);
     const [alerta, setAlerta] = useState({ status: "", message: "" });
@@ -30,10 +32,14 @@ function Albuns() {
     }
 
     const editarObjeto = async codigo => {
+        try{
         setObjeto(await getAlbunsPorCodigo(codigo))
         setEditar(true);
         setAlerta({ status: "", message: "" });
 		setExibirForm(true);
+        }catch (err){
+            navigate("/login", { replace: true });
+        }
     }
 
     const acaoCadastrar = async e => {
@@ -48,6 +54,7 @@ function Albuns() {
             }
         } catch (err) {
             console.error(err.message);
+            navigate("/login", { replace: true });
         }
         recuperaAlbun();
     }
@@ -58,25 +65,35 @@ function Albuns() {
     }
 
     const recuperaArtista= async () => {
-    
+    try{
         setCarregando(true);
         setListaArtistas(await getArtistasAPI());
        setCarregando(false);
+    }catch  (err){
+        navigate("/login", { replace: true });
+    }
     }
 
 
     const recuperaAlbun = async () => {
-    
+    try{
         setCarregando(true);
         setListaObjetos(await getAlbunsAPI());
         setCarregando(false);
+    }catch  (err){
+        navigate("/login", { replace: true });
+    }
     }
 
     const remover = async codigo => {
         if (window.confirm('Deseja remover este álbum?')) {
+            try{
             let retornoAPI = await deleteAlbuns(codigo);
             setAlerta({ status: retornoAPI.status, message: retornoAPI.message })
             recuperaAlbun();
+            }catch (err){
+                navigate("/login", { replace: true });
+            }
         }
     }
 
@@ -101,4 +118,4 @@ function Albuns() {
     );
 }
 
-export default Albuns;
+export default WithAuth (Albuns);
